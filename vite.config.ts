@@ -12,4 +12,5 @@ export default defineConfig({
       math: path.resolve(import.meta.dirname, "./src/components/mathematics"),
     },
   },
+  base: "/wikinox",
 });

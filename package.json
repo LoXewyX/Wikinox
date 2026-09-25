@@ -1,5 +1,6 @@
 {
   "name": "wikinox",
+  "homepage": "https://loxewyx.github.io/wikinox/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,6 +8,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "predeploy": "bun build",
+    "deploy": "gh-pahes -d dist",
     "create-category": "bun scripts/create-category.ts",
     "create-difficulty": "bun scripts/create-difficulty.ts",
     "create-topic": "bun scripts/create-topic.ts",
@@ -14,6 +17,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "gh-pages": "^6.3.0",
     "github-slugger": "^2.0.0",
     "jsxgraph": "^1.13.3",
     "katex": "^0.18.7",
