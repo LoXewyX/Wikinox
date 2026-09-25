@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/Wikinox",
+  base: "/Wikinox/",
   plugins: [preact(), tailwindcss()],
   resolve: {
     alias: {

@@ -222,7 +222,7 @@ export default function HomePage() {
               {filteredTopics.map((topic, index) => (
                 <a
                   key={topic.id}
-                  href={`/topics/${topic.id}`}
+                  href={`/Wikinox/topics/${topic.id}`}
                   className={[
                     "group flex items-center gap-4",
                     "min-h-20 py-4 sm:py-5",

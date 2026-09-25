@@ -18,10 +18,10 @@ export default function Header() {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-950/90">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <a
-            href="/"
+            href="/Wikinox"
             onClick={(event) => {
               event.preventDefault();
-              route("/");
+              route("/Wikinox");
             }}
             className="text-lg font-semibold tracking-tight text-neutral-900 transition-opacity hover:opacity-70 dark:text-neutral-100"
           >
