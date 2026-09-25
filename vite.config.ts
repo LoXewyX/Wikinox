@@ -1,0 +1,15 @@
+import path from "path";
+import preact from "@preact/preset-vite";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [preact(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "./src"),
+      math: path.resolve(import.meta.dirname, "./src/components/mathematics"),
+    },
+  },
+});

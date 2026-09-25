@@ -1,0 +1,147 @@
+export const en = {
+  common: {
+    home: "Home",
+    topics: "Topics",
+    search: "Search",
+    language: "Language",
+    theme: "Theme",
+    light: "Light",
+    dark: "Dark",
+    previous: "Previous",
+    next: "Next",
+    lessonNavigation: "Lesson navigation",
+    content: "Content",
+  },
+  home: {
+    title: "Mathematics",
+    description:
+      "Learn mathematics with explanations, examples, formulas, and interactive tools.",
+    topics: "Mathematics topics",
+    searchPlaceholder: "Search mathematics topics...",
+    clearSearch: "Clear search",
+    filters: {
+      category: "Category",
+      difficulty: "Difficulty",
+      all: "All",
+    },
+    clearFilters: "Clear filters",
+    noResults: "No topics found",
+    noResultsDescription: "Try changing your search or filters.",
+  },
+  topics: {
+    topic: {
+      "mathematical-notation": "Mathematical notation",
+      numbers: "Numbers",
+      polynomials: "Polynomials",
+      functions: "Functions",
+      logarithms: "Logarithms",
+      "polynomial-functions": "Polynomial Functions",
+      equations: "Equations",
+      "quadratic-equations": "Quadratic Equations",
+      "area-using-integrals": "Area Calculation Using Integrals",
+      determinants: "Determinant Calculation",
+      "inverse-matrix": "Inverse Matrix Calculation",
+      "tangent-lines": "Tangent Line Calculation",
+      "function-continuity": "Continuity of Functions",
+      "continuity-rational-functions": "Continuity of Rational Functions",
+      "continuity-piecewise-functions":
+        "Continuity and Piecewise-Defined Functions",
+      "function-differentiation": "Differentiation of Functions",
+      "parameter-dependent-system":
+        "Discussion of a System Depending on a Parameter",
+      "exponential-logarithmic-equations":
+        "Exponential and Logarithmic Equations",
+      "logarithmic-equations-advanced": "Logarithmic Equations (Advanced)",
+      "rational-radical-equations": "Rational and Radical Equations",
+      "function-analysis": "Function Analysis",
+      "rational-function-analysis": "Rational Function Analysis",
+      "derivative-examples":
+        "Derivative Examples (Product, Quotient, Chain Rule)",
+      "polynomial-factorization": "Polynomial Factorization",
+      "exponential-logarithmic-functions":
+        "Exponential and Logarithmic Functions",
+      "trigonometric-functions": "Trigonometric Functions",
+      "rational-inequalities": "Rational Inequalities",
+      "linear-quadratic-inequalities": "Linear and Quadratic Inequalities",
+      "engineering-mathematics-introduction":
+        "Introduction to Mathematics for Engineering",
+      integration: "Integration of Functions",
+      "integration-by-substitution": "Integration by Substitution",
+      "integration-by-parts": "Integration by Parts",
+      "interval-intersection": "Intersection of Intervals",
+      "irrational-function-limits": "Limits of Irrational Functions",
+      matrices: "Matrices",
+      "right-triangle-solving": "Solving Right Triangles",
+      "systems-of-equations": "Systems of Equations",
+      "two-linear-equations-two-unknowns":
+        "Systems of Two Linear Equations with Two Unknowns",
+      "underdetermined-system": "Solution of an Underdetermined System",
+      "trigonometric-equation-solutions":
+        "Solutions of a Trigonometric Equation",
+      "algebraic-fractions":
+        "Addition, Subtraction, and Multiplication of Algebraic Fractions",
+      "remainder-theorem": "Remainder Theorem",
+      "rouche-frobenius-theorem": "Rouché–Frobenius Theorem",
+    },
+    categories: {
+      foundations: "Foundations",
+      algebra: "Algebra",
+      "linear-algebra": "Linear Algebra",
+      functions: "Functions",
+      calculus: "Calculus",
+      engineering: "Engineering",
+      geometry: "Geometry",
+    },
+    difficulty: {
+      basic: "Basic",
+      intermediate: "Intermediate",
+      advanced: "Advanced",
+    },
+  },
+  mathematics: {
+    rightTriangle: {
+      title: "Right triangle",
+      ariaLabel: "Right triangle diagram",
+      adjacent: "adjacent",
+      opposite: "opposite",
+      hypotenuse: "hypotenuse",
+    },
+    functionGraph: {
+      title: "Function graph",
+      ariaLabel: "Graphical representation of the function",
+      input: "Input",
+      output: "Output",
+      operation: "Operation",
+      point: "Point",
+      tableDescription:
+        "We choose an input value, calculate the output, and obtain a point on the function.",
+    },
+    polynomialGraph: {
+      title: "Polynomial graph",
+      ariaLabel: "Graphical representation of the polynomial",
+      degree: "Degree",
+      realRoots: "Real roots",
+      yIntercept: "Y-intercept",
+      none: "None",
+    },
+    absoluteValue: {
+      title: "Absolute value",
+      ariaLabel: "Absolute value represents the distance from zero",
+      units: "units",
+      description:
+        "Both |−5| and |5| represent a distance of 5 units from zero.",
+    },
+    numberSets: {
+      title: "Number sets",
+      description: "Inclusion of number sets",
+      natural: "Natural numbers",
+      integers: "Integers",
+      rational: "Rational numbers",
+      real: "Real numbers",
+      irrational: "Irrational numbers",
+    },
+  },
+  errors: {
+    notFound: "Page not found",
+  },
+} as const;
