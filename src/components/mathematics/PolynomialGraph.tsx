@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useRef } from "preact/hooks";
-import JXG from "jsxgraph";
-import {
-  compile,
-  parse,
-  type ConstantNode,
-  type OperatorNode,
-  type ParenthesisNode,
-  type SymbolNode,
-  type MathNode,
-} from "mathjs";
+import { Parser } from "expr-eval";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useI18n } from "@/providers/I18nProvider";
@@ -26,20 +17,44 @@ interface PolynomialInfo {
   yIntercept: number | null;
 }
 
+interface ThemeColors {
+  axis: string;
+  grid: string;
+  zeroGrid: string;
+  text: string;
+  curve: string;
+  root: string;
+  yIntercept: string;
+  background: string;
+}
+
+type FunctionPlot = (options: Record<string, unknown>) => FunctionPlotInstance;
+
+interface FunctionPlotInstance {
+  root?: SVGSVGElement | Element;
+}
+
 const COLORS = {
   light: {
-    axis: "#111111",
-    curve: "#2563eb",
+    axis: "#737373",
+    grid: "#e5e5e5",
+    zeroGrid: "#bdbdbd",
+    text: "#171717",
+    curve: "#171717",
     root: "#dc2626",
     yIntercept: "#16a34a",
-    text: "#111111",
+    background: "#fafafa",
   },
+
   dark: {
-    axis: "#e5e5e5",
-    curve: "#60a5fa",
+    axis: "#a3a3a3",
+    grid: "#262626",
+    zeroGrid: "#525252",
+    text: "#f5f5f5",
+    curve: "#f5f5f5",
     root: "#f87171",
     yIntercept: "#4ade80",
-    text: "#e5e5e5",
+    background: "#171717",
   },
 };
 
@@ -49,17 +64,70 @@ const ROOT_TOLERANCE = 1e-10;
 const ROOT_MERGE_DISTANCE = 1e-4;
 const MAX_GRAPH_Y = 1e5;
 
+const parser = new Parser({
+  operators: {
+    add: true,
+    concatenate: false,
+    conditional: false,
+    divide: true,
+    factorial: false,
+    multiply: true,
+    power: true,
+    remainder: true,
+    subtract: true,
+    logical: false,
+    comparison: false,
+    in: false,
+    assignment: false,
+  },
+});
+
+function resolveFunctionPlot(module: unknown): FunctionPlot | null {
+  if (typeof module === "function") {
+    return module as FunctionPlot;
+  }
+
+  if (typeof module !== "object" || module === null) {
+    return null;
+  }
+
+  const firstLevel = module as {
+    default?: unknown;
+  };
+
+  if (typeof firstLevel.default === "function") {
+    return firstLevel.default as FunctionPlot;
+  }
+
+  if (typeof firstLevel.default === "object" && firstLevel.default !== null) {
+    const secondLevel = firstLevel.default as {
+      default?: unknown;
+    };
+
+    if (typeof secondLevel.default === "function") {
+      return secondLevel.default as FunctionPlot;
+    }
+  }
+
+  return null;
+}
+
 function normalizeExpression(expression: string): string {
-  return expression.replace(/\s+/g, "").replace(/−/g, "-");
+  return expression
+    .replace(/\s+/g, "")
+    .replace(/−/g, "-")
+    .replace(/π/g, "PI")
+    .replace(/\bpi\b/gi, "PI")
+    .replace(/\be\b/g, "E");
 }
 
 function createEvaluator(expression: string) {
   try {
-    const compiled = compile(expression);
+    const parsed = parser.parse(expression);
 
     return (x: number): number => {
       try {
-        const result = compiled.evaluate({ x });
+        const result = parsed.evaluate({ x });
 
         if (typeof result !== "number") {
           return Number.NaN;
@@ -77,109 +145,68 @@ function createEvaluator(expression: string) {
 
 function getPolynomialDegree(expression: string): number | null {
   try {
-    const root = parse(expression);
+    const parsed = parser.parse(expression);
 
-    function degreeOf(node: MathNode): number | null {
-      switch (node.type) {
-        case "ConstantNode":
-          return 0;
+    const symbols = parsed.symbols({
+      withMembers: true,
+    });
 
-        case "SymbolNode": {
-          const symbol = node as SymbolNode;
-          return symbol.name === "x" ? 1 : null;
-        }
+    const allowedSymbols = new Set(["x", "E", "PI"]);
 
-        case "ParenthesisNode": {
-          const parenthesis = node as ParenthesisNode;
-          return degreeOf(parenthesis.content);
-        }
-
-        case "OperatorNode": {
-          const operator = node as OperatorNode;
-
-          switch (operator.op) {
-            case "+":
-            case "-": {
-              const degrees = operator.args.map(degreeOf);
-
-              if (degrees.some((degree) => degree === null)) {
-                return null;
-              }
-
-              return Math.max(...(degrees as number[]));
-            }
-
-            case "*": {
-              const degrees = operator.args.map(degreeOf);
-
-              if (degrees.some((degree) => degree === null)) {
-                return null;
-              }
-
-              return (degrees as number[]).reduce(
-                (total, degree) => total + degree,
-                0,
-              );
-            }
-
-            case "/": {
-              if (operator.args.length !== 2) {
-                return null;
-              }
-
-              const numeratorDegree = degreeOf(operator.args[0]);
-              const denominatorDegree = degreeOf(operator.args[1]);
-
-              if (numeratorDegree === null || denominatorDegree === null) {
-                return null;
-              }
-
-              return numeratorDegree - denominatorDegree;
-            }
-
-            case "^": {
-              if (operator.args.length !== 2) {
-                return null;
-              }
-
-              const base = operator.args[0];
-              const exponent = operator.args[1];
-
-              const baseDegree = degreeOf(base);
-
-              if (baseDegree === null) {
-                return null;
-              }
-
-              if (exponent.type !== "ConstantNode") {
-                return null;
-              }
-
-              const constant = exponent as ConstantNode;
-              const exponentValue = Number(constant.value);
-
-              if (
-                !Number.isFinite(exponentValue) ||
-                !Number.isInteger(exponentValue) ||
-                exponentValue < 0
-              ) {
-                return null;
-              }
-
-              return baseDegree * exponentValue;
-            }
-
-            default:
-              return null;
-          }
-        }
-
-        default:
-          return null;
-      }
+    if (symbols.some((symbol) => !allowedSymbols.has(symbol))) {
+      return null;
     }
 
-    return degreeOf(root);
+    const evaluate = (x: number): number => {
+      try {
+        const value = parsed.evaluate({ x });
+
+        return typeof value === "number" && Number.isFinite(value)
+          ? value
+          : Number.NaN;
+      } catch {
+        return Number.NaN;
+      }
+    };
+
+    const MAX_DEGREE = 20;
+    const values: number[] = [];
+
+    for (let x = 0; x <= MAX_DEGREE + 1; x++) {
+      const value = evaluate(x);
+
+      if (!Number.isFinite(value) || Math.abs(value) > 1e15) {
+        return null;
+      }
+
+      values.push(value);
+    }
+
+    const isApproximatelyEqual = (a: number, b: number) => {
+      const scale = Math.max(1, Math.abs(a), Math.abs(b));
+
+      return Math.abs(a - b) <= 1e-9 * scale;
+    };
+
+    let differences = values;
+
+    for (let degree = 0; degree <= MAX_DEGREE; degree++) {
+      const first = differences[0];
+
+      if (differences.every((value) => isApproximatelyEqual(value, first))) {
+        return degree;
+      }
+
+      const next: number[] = [];
+
+      for (let i = 1; i < differences.length; i++) {
+        next.push(differences[i] - differences[i - 1]);
+      }
+
+      differences = next;
+    }
+
+    return null;
   } catch {
     return null;
   }
@@ -195,6 +222,7 @@ function findRoots(
   }
 
   const roots: number[] = [];
+
   const step = (max - min) / SAMPLE_COUNT;
 
   let previousX = min;
@@ -202,15 +230,14 @@ function findRoots(
 
   for (let i = 1; i <= SAMPLE_COUNT; i++) {
     const x = min + i * step;
+
     const y = evaluate(x);
 
     if (Number.isFinite(previousY) && Number.isFinite(y)) {
-      // Exact zero.
       if (Math.abs(previousY) < ROOT_TOLERANCE) {
         roots.push(previousX);
       }
 
-      // Sign change.
       if (previousY * y < 0) {
         let left = previousX;
         let right = x;
@@ -218,6 +245,7 @@ function findRoots(
 
         for (let iteration = 0; iteration < ROOT_ITERATIONS; iteration++) {
           const middle = (left + right) / 2;
+
           const middleY = evaluate(middle);
 
           if (!Number.isFinite(middleY)) {
@@ -279,64 +307,216 @@ function analyzePolynomial(
 
   return {
     degree: getPolynomialDegree(expression),
+
     roots: findRoots(evaluate, min, max),
+
     yIntercept: Number.isFinite(yIntercept) ? yIntercept : null,
   };
 }
 
-function createGraphSegments(
+function getYDomain(
   evaluate: (x: number) => number,
   min: number,
   max: number,
-) {
-  const segments: Array<[number[], number[]]> = [];
+): [number, number] {
+  const values: number[] = [];
 
-  const xs: number[] = [];
-  const ys: number[] = [];
+  for (let i = 0; i <= 100; i++) {
+    const x = min + ((max - min) * i) / 100;
 
-  const step = (max - min) / SAMPLE_COUNT;
-
-  const pushSegment = () => {
-    if (xs.length > 1) {
-      segments.push([xs.splice(0), ys.splice(0)]);
-    } else {
-      xs.length = 0;
-      ys.length = 0;
-    }
-  };
-
-  let previousY: number | null = null;
-
-  for (let i = 0; i <= SAMPLE_COUNT; i++) {
-    const x = min + i * step;
     const y = evaluate(x);
 
-    const valid =
-      Number.isFinite(x) && Number.isFinite(y) && Math.abs(y) <= MAX_GRAPH_Y;
-
-    if (!valid) {
-      pushSegment();
-      previousY = null;
-      continue;
+    if (Number.isFinite(y) && Math.abs(y) <= MAX_GRAPH_Y) {
+      values.push(y);
     }
-
-    /*
-     * Prevent a visually incorrect line when the function
-     * grows abruptly between two samples.
-     */
-    if (previousY !== null && Math.abs(y - previousY) > MAX_GRAPH_Y) {
-      pushSegment();
-    }
-
-    xs.push(x);
-    ys.push(y);
-
-    previousY = y;
   }
 
-  pushSegment();
+  if (values.length === 0) {
+    return [-10, 10];
+  }
 
-  return segments;
+  const minY = Math.min(...values);
+
+  const maxY = Math.max(...values);
+
+  let yMin: number;
+  let yMax: number;
+
+  if (minY === maxY) {
+    const padding = Math.max(Math.abs(minY) * 0.2, 1);
+
+    yMin = minY - padding;
+    yMax = maxY + padding;
+  } else {
+    const padding = Math.max((maxY - minY) * 0.1, 1);
+
+    yMin = minY - padding;
+    yMax = maxY + padding;
+  }
+
+  /*
+   * Keep the x-axis visible.
+   */
+  if (yMin > 0) {
+    yMin = 0;
+  }
+
+  if (yMax < 0) {
+    yMax = 0;
+  }
+
+  yMin = Math.max(yMin, -MAX_GRAPH_Y);
+
+  yMax = Math.min(yMax, MAX_GRAPH_Y);
+
+  return [yMin, yMax];
+}
+
+function styleAxisLabels(svg: SVGSVGElement, colors: ThemeColors): void {
+  svg.querySelectorAll(".axis-label").forEach((element) => {
+    const node = element as SVGTextElement;
+
+    node.style.setProperty("fill", colors.text, "important");
+
+    node.style.setProperty("font-size", "14px", "important");
+
+    node.style.setProperty("font-family", "inherit", "important");
+  });
+
+  svg.querySelectorAll(".x.axis text, .y.axis text").forEach((element) => {
+    const node = element as SVGTextElement;
+
+    const text = node.textContent?.trim();
+
+    if (text === "x" || text === "f(x)") {
+      node.style.setProperty("fill", colors.text, "important");
+
+      node.style.setProperty("font-size", "14px", "important");
+
+      node.style.setProperty("font-family", "inherit", "important");
+    }
+  });
+}
+
+function styleGraph(svg: SVGSVGElement, colors: ThemeColors): void {
+  svg.style.background = colors.background;
+
+  /*
+   * Grid.
+   *
+   * The grid lines corresponding to
+   * x = 0 and y = 0 are slightly
+   * stronger than the normal grid.
+   */
+  svg.querySelectorAll(".tick").forEach((tick) => {
+    const tickElement = tick as SVGGElement;
+
+    const text = tickElement.querySelector("text")?.textContent?.trim();
+
+    const line = tickElement.querySelector("line") as SVGLineElement | null;
+
+    if (!line) {
+      return;
+    }
+
+    const isZero = text === "0";
+
+    line.style.setProperty(
+      "stroke",
+      isZero ? colors.zeroGrid : colors.grid,
+      "important",
+    );
+
+    line.style.setProperty(
+      "stroke-width",
+      isZero ? "1.5px" : "1px",
+      "important",
+    );
+
+    line.style.setProperty("opacity", "1", "important");
+  });
+
+  /*
+   * Axis paths.
+   */
+  svg.querySelectorAll(".x.axis path, .y.axis path").forEach((path) => {
+    const element = path as SVGPathElement;
+
+    element.style.setProperty("stroke", colors.axis, "important");
+
+    element.style.setProperty("stroke-width", "1px", "important");
+
+    element.style.setProperty("stroke-dasharray", "none", "important");
+
+    element.style.setProperty("fill", "none", "important");
+  });
+
+  /*
+   * Tick text.
+   */
+  svg.querySelectorAll(".tick text").forEach((text) => {
+    const element = text as SVGTextElement;
+
+    element.style.setProperty("fill", colors.text, "important");
+
+    element.style.setProperty("font-size", "12px", "important");
+
+    element.style.setProperty("font-family", "inherit", "important");
+  });
+
+  /*
+   * Hide x = -3 and x = 3,
+   * as in FunctionGraph.
+   */
+  svg.querySelectorAll(".x.axis .tick text").forEach((text) => {
+    const element = text as SVGTextElement;
+
+    const value = element.textContent?.trim();
+
+    if (value === "-3" || value === "3") {
+      element.style.display = "none";
+    }
+  });
+
+  /*
+   * Function curve.
+   */
+  svg.querySelectorAll(".graph path").forEach((path) => {
+    const element = path as SVGPathElement;
+
+    element.style.setProperty("stroke", colors.curve, "important");
+
+    element.style.setProperty("stroke-width", "3.5px", "important");
+
+    element.style.setProperty("stroke-linecap", "round", "important");
+
+    element.style.setProperty("stroke-linejoin", "round", "important");
+
+    element.style.setProperty("stroke-dasharray", "none", "important");
+
+    element.style.setProperty("fill", "none", "important");
+  });
+
+  /*
+   * Root and y-intercept points.
+   */
+  svg.querySelectorAll(".root-point").forEach((element) => {
+    const circle = element as SVGCircleElement;
+
+    circle.style.setProperty("stroke", colors.background, "important");
+
+    circle.style.setProperty("stroke-width", "2px", "important");
+  });
+
+  svg.querySelectorAll(".y-intercept-point").forEach((element) => {
+    const circle = element as SVGCircleElement;
+
+    circle.style.setProperty("stroke", colors.background, "important");
+
+    circle.style.setProperty("stroke-width", "2px", "important");
+  });
+
+  styleAxisLabels(svg, colors);
 }
 
 export default function PolynomialGraph({
@@ -351,11 +531,13 @@ export default function PolynomialGraph({
 
   const safeMin = useMemo(() => {
     const value = Number(min);
+
     return Number.isFinite(value) ? value : -10;
   }, [min]);
 
   const safeMax = useMemo(() => {
     const value = Number(max);
+
     return Number.isFinite(value) ? value : 10;
   }, [max]);
 
@@ -388,130 +570,196 @@ export default function PolynomialGraph({
       return;
     }
 
-    const colors = isDarkMode ? COLORS.dark : COLORS.light;
+    let cancelled = false;
 
-    const board = JXG.JSXGraph.initBoard(container, {
-      boundingbox: [safeMin, 10, safeMax, -10],
+    const renderGraph = async () => {
+      container.innerHTML = "";
 
-      axis: true,
-      grid: true,
+      let functionPlot: FunctionPlot | null = null;
 
-      showNavigation: false,
-      showCopyright: false,
+      try {
+        const module = await import("function-plot");
 
-      zoom: {
-        min: 0.2,
-        max: 20,
-      },
+        if (cancelled) {
+          return;
+        }
 
-      pan: {
-        enabled: true,
-      },
+        functionPlot = resolveFunctionPlot(module);
+      } catch (error) {
+        console.error("Could not load function-plot:", error);
 
-      defaultAxes: {
-        x: {
-          strokeColor: colors.axis,
-          highlightStrokeColor: colors.axis,
+        return;
+      }
 
-          ticks: {
-            strokeColor: colors.axis,
-            highlightStrokeColor: colors.axis,
+      if (!functionPlot || cancelled) {
+        console.error("function-plot did not resolve to a function.");
 
-            label: {
-              strokeColor: colors.text,
-              highlightStrokeColor: colors.text,
-              fontSize: 12,
-            },
+        return;
+      }
+
+      const colors = isDarkMode ? COLORS.dark : COLORS.light;
+
+      const width = Math.max(container.clientWidth, 300);
+
+      const height = 500;
+
+      const [yMin, yMax] = getYDomain(evaluate, safeMin, safeMax);
+
+      /*
+       * Function curve.
+       */
+      const data: Record<string, unknown>[] = [
+        {
+          fn: (scope: { x: number }) => {
+            const x = scope.x;
+
+            if (typeof x !== "number") {
+              return Number.NaN;
+            }
+
+            const y = evaluate(x);
+
+            if (!Number.isFinite(y) || Math.abs(y) > MAX_GRAPH_Y) {
+              return Number.NaN;
+            }
+
+            return y;
           },
 
-          label: {
-            strokeColor: colors.text,
-            highlightStrokeColor: colors.text,
-            fontSize: 14,
+          fnType: "linear",
+          graphType: "polyline",
+          sampler: "builtIn",
+          nSamples: SAMPLE_COUNT,
+
+          color: colors.curve,
+
+          skipTip: true,
+        },
+      ];
+
+      /*
+       * Root markers.
+       */
+      const visibleRoots = info.roots.filter(
+        (root) => root >= safeMin && root <= safeMax,
+      );
+
+      if (visibleRoots.length > 0) {
+        data.push({
+          points: visibleRoots.map((root) => [root, 0]),
+
+          fnType: "points",
+          graphType: "scatter",
+
+          color: colors.root,
+
+          attr: {
+            r: 5,
+            class: "root-point",
           },
-        },
 
-        y: {
-          strokeColor: colors.axis,
-          highlightStrokeColor: colors.axis,
+          skipTip: true,
+        });
+      }
 
-          ticks: {
-            strokeColor: colors.axis,
-            highlightStrokeColor: colors.axis,
+      /*
+       * Y-intercept marker.
+       */
+      if (
+        info.yIntercept !== null &&
+        info.yIntercept >= yMin &&
+        info.yIntercept <= yMax
+      ) {
+        data.push({
+          points: [[0, info.yIntercept]],
 
-            label: {
-              strokeColor: colors.text,
-              highlightStrokeColor: colors.text,
-              fontSize: 12,
-            },
+          fnType: "points",
+          graphType: "scatter",
+
+          color: colors.yIntercept,
+
+          attr: {
+            r: 5,
+            class: "y-intercept-point",
           },
 
-          label: {
-            strokeColor: colors.text,
-            highlightStrokeColor: colors.text,
-            fontSize: 14,
+          skipTip: true,
+        });
+      }
+
+      try {
+        functionPlot({
+          target: container,
+
+          width,
+          height,
+
+          grid: true,
+
+          xAxis: {
+            domain: [safeMin, safeMax],
+            label: "x",
+            ticks: 9,
           },
-        },
-      },
-    });
 
-    const segments = createGraphSegments(evaluate, safeMin, safeMax);
+          yAxis: {
+            domain: [yMin, yMax],
+            label: "f(x)",
+            ticks: 9,
+          },
 
-    for (const [xs, ys] of segments) {
-      board.create("curve", [xs, ys], {
-        strokeColor: colors.curve,
-        strokeWidth: 3,
-        fixed: true,
-        highlight: false,
-      });
-    }
+          /*
+           * Graph is informational rather
+           * than interactive.
+           */
+          disableZoom: true,
+          resize: false,
 
-    for (const root of info.roots) {
-      board.create("point", [root, 0], {
-        name: `(${formatNumber(root)}, 0)`,
+          data,
 
-        size: 5,
+          tip: {
+            xLine: false,
+            yLine: false,
+          },
+        });
+      } catch (error) {
+        console.error("Could not render polynomial graph:", error);
 
-        strokeColor: colors.root,
-        fillColor: colors.root,
+        return;
+      }
 
-        fixed: true,
-        highlight: false,
+      if (cancelled) {
+        return;
+      }
 
-        label: {
-          offset: [8, 8],
-          fontSize: 13,
-          strokeColor: colors.root,
-        },
-      });
-    }
+      const svg = container.querySelector("svg") as SVGSVGElement | null;
 
-    if (info.yIntercept !== null && Math.abs(info.yIntercept) <= MAX_GRAPH_Y) {
-      board.create("point", [0, info.yIntercept], {
-        name: `(0, ${formatNumber(info.yIntercept)})`,
+      if (!svg) {
+        return;
+      }
 
-        size: 5,
+      svg.style.pointerEvents = "none";
 
-        strokeColor: colors.yIntercept,
-        fillColor: colors.yIntercept,
+      svg.style.userSelect = "none";
 
-        fixed: true,
-        highlight: false,
+      svg.style.touchAction = "none";
 
-        label: {
-          offset: [8, 8],
-          fontSize: 13,
-          strokeColor: colors.yIntercept,
-        },
-      });
-    }
+      container.style.userSelect = "none";
 
-    board.fullUpdate();
+      container.style.touchAction = "none";
+
+      container.style.backgroundColor = colors.background;
+
+      styleGraph(svg, colors);
+    };
+
+    void renderGraph();
 
     return () => {
-      JXG.JSXGraph.freeBoard(board);
+      cancelled = true;
+      container.innerHTML = "";
     };
-  }, [evaluate, safeMin, safeMax, info.roots, info.yIntercept, isDarkMode]);
+  }, [evaluate, safeMin, safeMax, info, isDarkMode]);
 
   return (
     <Card className="my-8 overflow-hidden">
@@ -526,7 +774,7 @@ export default function PolynomialGraph({
       <CardContent>
         <div
           ref={boardRef}
-          className="h-125 w-full"
+          className="h-125 w-full overflow-hidden"
           role="img"
           aria-label={t.mathematics.polynomialGraph.ariaLabel}
         />

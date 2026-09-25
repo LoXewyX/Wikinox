@@ -107,14 +107,7 @@ export const en = {
       hypotenuse: "hypotenuse",
     },
     functionGraph: {
-      title: "Function graph",
-      ariaLabel: "Graphical representation of the function",
-      input: "Input",
-      output: "Output",
       operation: "Operation",
-      point: "Point",
-      tableDescription:
-        "We choose an input value, calculate the output, and obtain a point on the function.",
     },
     polynomialGraph: {
       title: "Polynomial graph",

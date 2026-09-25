@@ -20,7 +20,7 @@ $$
 
 Això significa que la funció pren un nombre $x$, el multiplica per 2 i després hi suma 1.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ## 1. Elements d'una funció
@@ -73,7 +73,7 @@ $$
 f(2)=4
 $$
 
-:::function-graph{expression="3x-2" showWorkings=true}
+:::function-graph{expression="3x-2"}
 :::
 
 ## 3. Representació gràfica d'una funció
@@ -187,7 +187,7 @@ $$
 
 Tots aquests punts pertanyen a la gràfica de la funció.
 
-:::function-graph{expression="x+1" showWorkings=true}
+:::function-graph{expression="x+1"}
 :::
 
 ### 3.3. Dels punts a la corba
@@ -270,7 +270,7 @@ Això significa que per cada unitat que avancem horitzontalment, pugem 2 unitats
 
 Per això tots els punts mantenen la mateixa direcció i la gràfica és una recta.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ### 3.5. Quan canvia la pendent
@@ -333,7 +333,7 @@ $$
 
 és una **paràbola**.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ### 3.6. Què significa la curvatura
@@ -364,7 +364,7 @@ assoleix el seu valor mínim.
 
 Després comença a créixer.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 La forma de la gràfica, per tant, no és arbitrària.
@@ -409,7 +409,7 @@ El valor de la funció augmenta.
 
 Per això la gràfica puja d'esquerra a dreta.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ### 3.8. Com reconèixer una funció decreixent
@@ -438,7 +438,7 @@ En augmentar $x$, el valor de la funció disminueix.
 
 Per això la gràfica baixa d'esquerra a dreta.
 
-:::function-graph{expression="-2x+1" showWorkings=true}
+:::function-graph{expression="-2x+1"}
 :::
 
 ### 3.9. Una gràfica pot canviar de direcció
@@ -457,7 +457,7 @@ Després d'arribar al mínim, comença a créixer.
 
 Podem observar aquest comportament a la gràfica:
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 Aquest canvi de comportament permet identificar punts importants de la gràfica, com els **màxims** i els **mínims**.
@@ -502,7 +502,7 @@ Per l'altre costat, quan $x$ s'aproxima a 0 mitjançant valors negatius, obtenim
 
 Per això la gràfica té dues branques separades.
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 La recta:
@@ -571,7 +571,7 @@ Els punts formen dues rectes que es troben a l'origen.
 
 Per això la gràfica té forma de V.
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 ### 3.12. La forma de la gràfica depèn de l'expressió
@@ -611,7 +611,7 @@ $$
 
 Per a qualsevol valor de $x$, el resultat és 3.
 
-:::function-graph{expression="3" showWorkings=true}
+:::function-graph{expression="3"}
 :::
 
 La seva gràfica és una recta horitzontal.
@@ -636,7 +636,7 @@ $$
 
 Si $x$ augmenta en 1, el valor de $f(x)$ augmenta en 2.
 
-:::function-graph{expression="2x" showWorkings=true}
+:::function-graph{expression="2x"}
 :::
 
 Si la pendent és positiva, la funció augmenta.
@@ -655,7 +655,7 @@ $$
 f(x)=-2x
 $$
 
-:::function-graph{expression="-2x" showWorkings=true}
+:::function-graph{expression="-2x"}
 :::
 
 ## 6. Funció afí
@@ -676,7 +676,7 @@ $$
 
 En aquesta funció, la pendent és $2$ i el terme independent és $1$.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 Si $b=0$, obtenim una funció lineal:
@@ -697,7 +697,7 @@ $$
 f(x)=2x+1
 $$
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 Una funció és **decreixent** quan els seus valors disminueixen en augmentar $x$.
@@ -708,7 +708,7 @@ $$
 f(x)=-2x+1
 $$
 
-:::function-graph{expression="-2x+1" showWorkings=true}
+:::function-graph{expression="-2x+1"}
 :::
 
 En les funcions afins, el signe de la pendent permet determinar si la funció és creixent o decreixent.
@@ -745,7 +745,7 @@ $$
 f(x)=x^2
 $$
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 La seva gràfica té forma de paràbola.
@@ -766,7 +766,7 @@ $$
 f(x)=-x^2
 $$
 
-:::function-graph{expression="-x^2" showWorkings=true}
+:::function-graph{expression="-x^2"}
 :::
 
 ## 9. Funció de valor absolut
@@ -797,7 +797,7 @@ $$
 f(x)=|x|
 $$
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 La seva gràfica té forma de V.
@@ -820,7 +820,7 @@ $$
 
 La gràfica d'aquesta funció té dues branques.
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 El valor $x=0$ no pertany al domini d'aquesta funció.
@@ -911,7 +911,7 @@ Per tant, $x=2$ és un zero de la funció.
 
 Gràficament, correspon al punt on la gràfica talla l'eix $x$.
 
-:::function-graph{expression="x-2" showWorkings=true}
+:::function-graph{expression="x-2"}
 :::
 
 ## 14. Intersecció amb l'eix $y$
@@ -940,7 +940,7 @@ $$
 (0,3)
 $$
 
-:::function-graph{expression="2x+3" showWorkings=true}
+:::function-graph{expression="2x+3"}
 :::
 
 ## 15. Transformacions de funcions
@@ -961,7 +961,7 @@ $$
 
 la gràfica es desplaça 2 unitats cap amunt.
 
-:::function-graph{expression="x^2+2" showWorkings=true}
+:::function-graph{expression="x^2+2"}
 :::
 
 Si restem 2:
@@ -972,7 +972,7 @@ $$
 
 la gràfica es desplaça 2 unitats cap avall.
 
-:::function-graph{expression="x^2-2" showWorkings=true}
+:::function-graph{expression="x^2-2"}
 :::
 
 Si canviem $x$ per $x-2$:
@@ -983,7 +983,7 @@ $$
 
 la gràfica es desplaça 2 unitats cap a la dreta.
 
-:::function-graph{expression="(x-2)^2" showWorkings=true}
+:::function-graph{expression="(x-2)^2"}
 :::
 
 ## 16. Funcions i taules de valors
@@ -1096,7 +1096,7 @@ $$
 (f\circ g)(x)=2x+2
 $$
 
-:::function-graph{expression="2x+2" showWorkings=true}
+:::function-graph{expression="2x+2"}
 :::
 
 ## 19. Funció inversa
@@ -1139,10 +1139,10 @@ $$
 f^{-1}(x)=x-2
 $$
 
-:::function-graph{expression="x+2" showWorkings=true}
+:::function-graph{expression="x+2"}
 :::
 
-:::function-graph{expression="x-2" showWorkings=true}
+:::function-graph{expression="x-2"}
 :::
 
 La funció i la seva inversa reflecteixen les seves gràfiques respecte de la recta:
@@ -1171,10 +1171,10 @@ El símbol $\geq$ significa **«més gran o igual que»**.
 
 Per tant, per a valors negatius de $x$ utilitzem $x+1$, mentre que per a valors més grans o iguals que 0 utilitzem $x^2$.
 
-:::function-graph{expression="x+1" restriction="x<0" showWorkings=true}
+:::function-graph{expression="x+1" restriction="x<0"}
 :::
 
-:::function-graph{expression="x^2" restriction="x>=0" showWorkings=true}
+:::function-graph{expression="x^2" restriction="x>=0"}
 :::
 
 Les funcions definides a trossos són especialment útils per representar situacions en què una mateixa relació canvia segons l'interval considerat.

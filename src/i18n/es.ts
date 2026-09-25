@@ -106,14 +106,7 @@ export const es = {
       hypotenuse: "hipotenusa",
     },
     functionGraph: {
-      title: "Gráfica de la función",
-      ariaLabel: "Representación gráfica de la función",
-      input: "Entrada",
-      output: "Salida",
       operation: "Operación",
-      point: "Punto",
-      tableDescription:
-        "Elegimos un valor de entrada, calculamos la salida y obtenemos un punto de la función.",
     },
     polynomialGraph: {
       title: "Gráfica del polinomio",

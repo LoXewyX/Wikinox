@@ -1,247 +1,267 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import JXG from "jsxgraph";
-import { compile } from "mathjs";
-import { ChevronDown } from "lucide-preact";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Parser } from "expr-eval";
+import { ChevronDown, ChevronUp, Table2 } from "lucide-preact";
 import { useI18n } from "@/providers/I18nProvider";
 import { useTheme } from "@/providers/ThemeProvider";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+
 interface FunctionGraphProps {
   expression: string;
-  restriction?: string;
-  showWorkings?: boolean;
+  min?: number | string;
+  max?: number | string;
 }
 
-interface ParsedRestriction {
-  min: number;
-  max: number;
+interface ThemeColors {
+  axis: string;
+  grid: string;
+  zeroGrid: string;
+  text: string;
+  curve: string;
+  point: string;
+  background: string;
 }
 
-interface SamplePoint {
+interface TablePoint {
   x: number;
   y: number;
+  operation: string;
 }
 
-type Evaluator = (x: number) => number | null;
+interface TableData {
+  points: TablePoint[];
+}
+
+type FunctionPlot = (options: Record<string, unknown>) => unknown;
+
+const SAMPLE_COUNT = 100;
+const TABLE_POINTS = 5;
+const MAX_SAMPLE_Y = 1e6;
+
+const parser = new Parser();
 
 const COLORS = {
-  light: "#111111",
-  dark: "#e5e5e5",
-  curve: "#2563eb",
-  input: "#2563eb",
-  output: "#dc2626",
-  point: "#16a34a",
-  inputLine: "#f59e0b",
-  outputLine: "#9333ea",
+  light: {
+    axis: "#737373",
+    grid: "#e5e5e5",
+    zeroGrid: "#bdbdbd",
+    text: "#171717",
+    curve: "#171717",
+    point: "#171717",
+    background: "#fafafa",
+  },
+  dark: {
+    axis: "#a3a3a3",
+    grid: "#262626",
+    zeroGrid: "#525252",
+    text: "#f5f5f5",
+    curve: "#f5f5f5",
+    point: "#f5f5f5",
+    background: "#171717",
+  },
 };
 
-const DEFAULT_RESTRICTION: ParsedRestriction = {
-  min: -10,
-  max: 10,
-};
+function resolveFunctionPlot(module: unknown): FunctionPlot | null {
+  if (typeof module === "function") {
+    return module as FunctionPlot;
+  }
 
-const SAMPLE_COUNT = 1000;
-const MAX_SAMPLE_POINTS = 5;
-const MAX_SEGMENT_JUMP = 100;
-const MAX_SAMPLE_Y = 100000;
-
-const SAMPLE_X_VALUES = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-
-function formatNumber(value: number): string {
-  return Number.isInteger(value)
-    ? String(value)
-    : Number(value.toFixed(4)).toString();
-}
-
-function evaluateBound(value: string): number | null {
-  try {
-    const result = compile(value).evaluate();
-    const numeric = typeof result === "number" ? result : Number(result);
-
-    return Number.isFinite(numeric) ? numeric : null;
-  } catch {
+  if (typeof module !== "object" || module === null) {
     return null;
   }
-}
 
-function parseRestriction(restriction?: string): ParsedRestriction {
-  if (!restriction) {
-    return DEFAULT_RESTRICTION;
-  }
-
-  const normalized = restriction.replace(/\s+/g, "").replace(/−/g, "-");
-
-  let match = normalized.match(/^(.+?)<=x<=(.+)$/);
-
-  if (match) {
-    const min = evaluateBound(match[1]);
-    const max = evaluateBound(match[2]);
-
-    if (min !== null && max !== null && min < max) {
-      return { min, max };
-    }
-
-    return DEFAULT_RESTRICTION;
-  }
-
-  match = normalized.match(/^x>=(.+)$/);
-
-  if (match) {
-    const min = evaluateBound(match[1]);
-
-    if (min !== null) {
-      return {
-        min,
-        max: DEFAULT_RESTRICTION.max,
-      };
-    }
-
-    return DEFAULT_RESTRICTION;
-  }
-
-  match = normalized.match(/^x>(.+)$/);
-
-  if (match) {
-    const min = evaluateBound(match[1]);
-
-    if (min !== null) {
-      return {
-        min,
-        max: DEFAULT_RESTRICTION.max,
-      };
-    }
-
-    return DEFAULT_RESTRICTION;
-  }
-
-  match = normalized.match(/^x<=(.+)$/);
-
-  if (match) {
-    const max = evaluateBound(match[1]);
-
-    if (max !== null) {
-      return {
-        min: DEFAULT_RESTRICTION.min,
-        max,
-      };
-    }
-
-    return DEFAULT_RESTRICTION;
-  }
-
-  match = normalized.match(/^x<(.+)$/);
-
-  if (match) {
-    const max = evaluateBound(match[1]);
-
-    if (max !== null) {
-      return {
-        min: DEFAULT_RESTRICTION.min,
-        max,
-      };
-    }
-  }
-
-  return DEFAULT_RESTRICTION;
-}
-
-function createEvaluator(expression: string): Evaluator {
-  try {
-    const compiled = compile(expression);
-
-    return (x: number) => {
-      try {
-        const result = compiled.evaluate({ x });
-        const value = typeof result === "number" ? result : Number(result);
-
-        return Number.isFinite(value) ? value : null;
-      } catch {
-        return null;
-      }
-    };
-  } catch {
-    return () => null;
-  }
-}
-
-function createSegments(
-  evaluate: Evaluator,
-  min: number,
-  max: number,
-): Array<Array<[number, number]>> {
-  const segments: Array<Array<[number, number]>> = [];
-  const step = (max - min) / SAMPLE_COUNT;
-
-  let segment: Array<[number, number]> = [];
-  let previousY: number | null = null;
-
-  const pushSegment = () => {
-    if (segment.length > 1) {
-      segments.push(segment);
-    }
-
-    segment = [];
+  const firstLevel = module as {
+    default?: unknown;
   };
 
-  for (let i = 0; i <= SAMPLE_COUNT; i++) {
-    const x = min + step * i;
-    const y = evaluate(x);
-
-    if (y === null || Math.abs(y) > MAX_SAMPLE_Y) {
-      pushSegment();
-      previousY = null;
-      continue;
-    }
-
-    if (previousY !== null && Math.abs(y - previousY) > MAX_SEGMENT_JUMP) {
-      pushSegment();
-    }
-
-    segment.push([x, y]);
-    previousY = y;
+  if (typeof firstLevel.default === "function") {
+    return firstLevel.default as FunctionPlot;
   }
 
-  pushSegment();
+  if (typeof firstLevel.default === "object" && firstLevel.default !== null) {
+    const secondLevel = firstLevel.default as {
+      default?: unknown;
+    };
 
-  return segments;
+    if (typeof secondLevel.default === "function") {
+      return secondLevel.default as FunctionPlot;
+    }
+  }
+
+  return null;
 }
 
-function getSamplePoints(
-  evaluate: Evaluator,
-  restriction: ParsedRestriction,
-): SamplePoint[] {
-  const points: SamplePoint[] = [];
+function parseDomain(
+  value: number | string | undefined,
+  fallback: number,
+): number {
+  const parsed = Number(value);
 
-  for (const x of SAMPLE_X_VALUES) {
-    if (x < restriction.min || x > restriction.max) {
-      continue;
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function evaluateExpression(expression: string, x: number): number {
+  try {
+    const parsed = parser.parse(expression);
+    const result = parsed.evaluate({ x });
+
+    if (typeof result !== "number") {
+      return Number.NaN;
     }
 
-    const y = evaluate(x);
+    return Number.isFinite(result) ? result : Number.NaN;
+  } catch {
+    return Number.NaN;
+  }
+}
 
-    if (y === null || Math.abs(y) > MAX_SAMPLE_Y) {
-      continue;
-    }
+function getFunctionYDomain(
+  expression: string,
+  min: number,
+  max: number,
+): [number, number] {
+  const values: number[] = [];
 
-    points.push({ x, y });
+  for (let i = 0; i <= SAMPLE_COUNT; i++) {
+    const x = min + ((max - min) * i) / SAMPLE_COUNT;
 
-    if (points.length >= MAX_SAMPLE_POINTS) {
-      break;
+    const y = evaluateExpression(expression, x);
+
+    if (Number.isFinite(y) && Math.abs(y) <= MAX_SAMPLE_Y) {
+      values.push(y);
     }
   }
 
-  return points;
+  if (values.length === 0) {
+    return [-10, 10];
+  }
+
+  const minY = Math.min(...values);
+  const maxY = Math.max(...values);
+
+  if (minY === maxY) {
+    const padding = Math.max(Math.abs(minY) * 0.2, 1);
+
+    return [
+      Math.max(-MAX_SAMPLE_Y, minY - padding),
+      Math.min(MAX_SAMPLE_Y, maxY + padding),
+    ];
+  }
+
+  const padding = Math.max((maxY - minY) * 0.1, 1);
+
+  let yMin = Math.max(-MAX_SAMPLE_Y, minY - padding);
+
+  let yMax = Math.min(MAX_SAMPLE_Y, maxY + padding);
+
+  if (yMin > 0) {
+    yMin = 0;
+  }
+
+  if (yMax < 0) {
+    yMax = 0;
+  }
+
+  return [yMin, yMax];
+}
+
+function formatNumber(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return Number(value.toFixed(3)).toString();
 }
 
 function formatOperation(expression: string, x: number): string {
-  return expression.replace(/\bx\b/g, `(${formatNumber(x)})`);
+  return expression.replace(
+    /(?<![A-Za-z0-9_])x(?![A-Za-z0-9_])/g,
+    `(${formatNumber(x)})`,
+  );
+}
+
+function styleFunctionCurve(svg: SVGSVGElement, colors: ThemeColors) {
+  svg.querySelectorAll(".graph path").forEach((path) => {
+    const element = path as SVGPathElement;
+
+    element.style.setProperty("stroke", colors.curve, "important");
+
+    element.style.setProperty("fill", "none", "important");
+
+    element.style.setProperty("stroke-width", "2px", "important");
+  });
+}
+
+function styleSamplePoints(svg: SVGSVGElement, colors: ThemeColors) {
+  svg.querySelectorAll("circle").forEach((circle) => {
+    const element = circle as SVGCircleElement;
+
+    element.setAttribute("r", "4.5");
+
+    element.style.setProperty("fill", colors.point, "important");
+
+    element.style.setProperty("stroke", colors.background, "important");
+
+    element.style.setProperty("stroke-width", "2px", "important");
+
+    element.style.setProperty("paint-order", "stroke fill", "important");
+  });
+}
+
+function styleAxisLabels(svg: SVGSVGElement, colors: ThemeColors) {
+  svg.querySelectorAll("text").forEach((text) => {
+    const element = text as SVGTextElement;
+
+    element.style.setProperty("fill", colors.text, "important");
+  });
+}
+
+function styleGraph(svg: SVGSVGElement, colors: ThemeColors) {
+  svg.querySelectorAll(".tick").forEach((tick) => {
+    const tickElement = tick as SVGGElement;
+
+    const text = tickElement.querySelector("text")?.textContent?.trim();
+
+    const line = tickElement.querySelector("line") as SVGLineElement | null;
+
+    if (!line) {
+      return;
+    }
+
+    const isZero = text === "0";
+
+    line.style.setProperty(
+      "stroke",
+      isZero ? colors.zeroGrid : colors.grid,
+      "important",
+    );
+
+    line.style.setProperty(
+      "stroke-width",
+      isZero ? "1.5px" : "1px",
+      "important",
+    );
+
+    line.style.setProperty("opacity", "1", "important");
+  });
+
+  svg.querySelectorAll(".x.axis path, .y.axis path").forEach((path) => {
+    const element = path as SVGPathElement;
+
+    element.style.setProperty("stroke", colors.axis, "important");
+
+    element.style.setProperty("fill", "none", "important");
+  });
 }
 
 export default function FunctionGraph({
   expression,
-  restriction,
-  showWorkings = false,
+  min = -3,
+  max = 3,
 }: FunctionGraphProps) {
   const { t } = useI18n();
   const { resolvedTheme } = useTheme();
@@ -250,321 +270,289 @@ export default function FunctionGraph({
 
   const [showTable, setShowTable] = useState(false);
 
-  const isDarkMode = resolvedTheme === "dark";
+  const safeMin = useMemo(() => parseDomain(min, -3), [min]);
 
-  const parsedRestriction = useMemo(
-    () => parseRestriction(restriction),
-    [restriction],
-  );
+  const safeMax = useMemo(() => parseDomain(max, 3), [max]);
 
-  const evaluate = useMemo(() => createEvaluator(expression), [expression]);
+  const tableData = useMemo<TableData>(() => {
+    const points: TablePoint[] = [];
 
-  const samplePoints = useMemo(
-    () => getSamplePoints(evaluate, parsedRestriction),
-    [evaluate, parsedRestriction],
-  );
-
-  useEffect(() => {
-    const container = boardRef.current;
-
-    if (!container) {
-      return;
+    if (
+      !Number.isFinite(safeMin) ||
+      !Number.isFinite(safeMax) ||
+      safeMin >= safeMax
+    ) {
+      return { points };
     }
 
-    const neutralColor = isDarkMode ? COLORS.dark : COLORS.light;
+    for (let i = 0; i < TABLE_POINTS; i++) {
+      const ratio = i / (TABLE_POINTS - 1);
 
-    const colors = showWorkings
-      ? {
-          curve: COLORS.curve,
-          input: COLORS.input,
-          output: COLORS.output,
-          point: COLORS.point,
-          inputLine: COLORS.inputLine,
-          outputLine: COLORS.outputLine,
-        }
-      : {
-          curve: neutralColor,
-          input: neutralColor,
-          output: neutralColor,
-          point: neutralColor,
-          inputLine: neutralColor,
-          outputLine: neutralColor,
-        };
+      const x = safeMin + (safeMax - safeMin) * ratio;
 
-    const board = JXG.JSXGraph.initBoard(container, {
-      boundingbox: [-10, 10, 10, -10],
-      axis: true,
-      grid: true,
-      showNavigation: false,
-      showCopyright: false,
+      const y = evaluateExpression(expression, x);
 
-      zoom: {
-        min: 0.2,
-        max: 20,
-      },
+      if (!Number.isFinite(y)) {
+        continue;
+      }
 
-      pan: {
-        enabled: true,
-      },
-
-      defaultAxes: {
-        x: {
-          strokeColor: neutralColor,
-          highlightStrokeColor: neutralColor,
-
-          ticks: {
-            strokeColor: neutralColor,
-            highlightStrokeColor: neutralColor,
-
-            label: {
-              strokeColor: neutralColor,
-              highlightStrokeColor: neutralColor,
-              fontSize: 12,
-            },
-          },
-
-          label: {
-            strokeColor: neutralColor,
-            highlightStrokeColor: neutralColor,
-            fontSize: 14,
-          },
-        },
-
-        y: {
-          strokeColor: neutralColor,
-          highlightStrokeColor: neutralColor,
-
-          ticks: {
-            strokeColor: neutralColor,
-            highlightStrokeColor: neutralColor,
-
-            label: {
-              strokeColor: neutralColor,
-              highlightStrokeColor: neutralColor,
-              fontSize: 12,
-            },
-          },
-
-          label: {
-            strokeColor: neutralColor,
-            highlightStrokeColor: neutralColor,
-            fontSize: 14,
-          },
-        },
-      },
-    });
-
-    const segments = createSegments(
-      evaluate,
-      parsedRestriction.min,
-      parsedRestriction.max,
-    );
-
-    for (const segment of segments) {
-      const xs = segment.map(([x]) => x);
-      const ys = segment.map(([, y]) => y);
-
-      board.create("curve", [xs, ys], {
-        strokeColor: colors.curve,
-        strokeWidth: showWorkings ? 3 : 3.5,
-        fixed: true,
+      points.push({
+        x,
+        y,
+        operation: formatOperation(expression, x),
       });
     }
 
-    if (showWorkings) {
-      for (const { x, y } of samplePoints) {
-        board.create("point", [x, 0], {
-          name: formatNumber(x),
-          size: 4,
-          strokeColor: colors.input,
-          fillColor: colors.input,
-          fixed: true,
+    return { points };
+  }, [expression, safeMin, safeMax]);
 
-          label: {
-            offset: [-6, -20],
-            fontSize: 13,
-            strokeColor: colors.input,
+  useEffect(() => {
+    let cancelled = false;
+
+    const renderGraph = async () => {
+      const container = boardRef.current;
+
+      if (
+        !container ||
+        !Number.isFinite(safeMin) ||
+        !Number.isFinite(safeMax) ||
+        safeMin >= safeMax
+      ) {
+        return;
+      }
+
+      const colors = resolvedTheme === "dark" ? COLORS.dark : COLORS.light;
+
+      container.innerHTML = "";
+
+      const module = await import("function-plot");
+
+      if (cancelled) {
+        return;
+      }
+
+      const functionPlot = resolveFunctionPlot(module);
+
+      if (!functionPlot) {
+        return;
+      }
+
+      const width = Math.max(container.clientWidth, 300);
+
+      const height = 500;
+
+      const [yMin, yMax] = getFunctionYDomain(expression, safeMin, safeMax);
+
+      const data: Record<string, unknown>[] = [
+        {
+          fn: (scope: { x?: number }) => {
+            const x = scope.x;
+
+            if (typeof x !== "number") {
+              return Number.NaN;
+            }
+
+            const y = evaluateExpression(expression, x);
+
+            if (!Number.isFinite(y) || Math.abs(y) > MAX_SAMPLE_Y) {
+              return Number.NaN;
+            }
+
+            return y;
           },
-        });
 
-        board.create("point", [0, y], {
-          name: formatNumber(y),
-          size: 4,
-          strokeColor: colors.output,
-          fillColor: colors.output,
-          fixed: true,
+          fnType: "linear",
+          graphType: "polyline",
+          sampler: "builtIn",
+          nSamples: SAMPLE_COUNT,
 
-          label: {
-            offset: [8, 4],
-            fontSize: 13,
-            strokeColor: colors.output,
+          color: colors.curve,
+
+          skipTip: true,
+        },
+      ];
+
+      if (showTable && tableData.points.length > 0) {
+        data.push({
+          points: tableData.points.map(({ x, y }) => [x, y]),
+
+          fnType: "points",
+          graphType: "scatter",
+
+          color: colors.point,
+
+          attr: {
+            r: 4.5,
           },
-        });
 
-        board.create(
-          "segment",
-          [
-            [x, 0],
-            [x, y],
-          ],
-          {
-            strokeColor: colors.inputLine,
-            strokeWidth: 1.5,
-            dash: 2,
-            fixed: true,
-          },
-        );
-
-        board.create(
-          "segment",
-          [
-            [0, y],
-            [x, y],
-          ],
-          {
-            strokeColor: colors.outputLine,
-            strokeWidth: 1.5,
-            dash: 2,
-            fixed: true,
-          },
-        );
-
-        board.create("point", [x, y], {
-          name: `(${formatNumber(x)}, ${formatNumber(y)})`,
-          size: 5,
-          strokeColor: colors.point,
-          fillColor: colors.point,
-          fixed: true,
-
-          label: {
-            offset: [8, 8],
-            fontSize: 13,
-            strokeColor: colors.point,
-          },
+          skipTip: true,
         });
       }
-    }
 
-    board.create("text", [9, -1, "x"], {
-      fixed: true,
-      fontSize: 16,
-      strokeColor: colors.input,
-    });
+      functionPlot({
+        target: container,
 
-    board.create("text", [0.4, 9, "f(x)"], {
-      fixed: true,
-      fontSize: 16,
-      strokeColor: colors.output,
-    });
+        width,
+        height,
 
-    board.fullUpdate();
+        grid: true,
+
+        xAxis: {
+          domain: [safeMin, safeMax],
+          label: "x",
+        },
+
+        yAxis: {
+          domain: [yMin, yMax],
+          label: "f(x)",
+        },
+
+        disableZoom: true,
+
+        data,
+
+        tip: {
+          xLine: false,
+          yLine: false,
+        },
+      });
+
+      if (cancelled) {
+        return;
+      }
+
+      const svg = container.querySelector("svg") as SVGSVGElement | null;
+
+      if (!svg) {
+        return;
+      }
+
+      styleGraph(svg, colors);
+
+      styleFunctionCurve(svg, colors);
+
+      styleSamplePoints(svg, colors);
+
+      styleAxisLabels(svg, colors);
+
+      svg.querySelectorAll(".x.axis .tick text").forEach((text) => {
+        const value = text.textContent?.trim();
+
+        if (value === "-3" || value === "3") {
+          (text as SVGTextElement).style.setProperty(
+            "display",
+            "none",
+            "important",
+          );
+        }
+      });
+    };
+
+    renderGraph();
 
     return () => {
-      JXG.JSXGraph.freeBoard(board);
+      cancelled = true;
+
+      if (boardRef.current) {
+        boardRef.current.innerHTML = "";
+      }
     };
-  }, [evaluate, parsedRestriction, samplePoints, showWorkings, isDarkMode]);
+  }, [expression, safeMin, safeMax, resolvedTheme, tableData, showTable]);
 
   return (
     <Card className="my-8 overflow-hidden">
       <CardHeader>
-        <CardTitle>
-          <span className="font-mono text-base">f(x) = {expression}</span>
-        </CardTitle>
+        <div className="flex items-center justify-between gap-4">
+          <CardTitle>
+            <span className="font-mono text-base font-medium">
+              f(x) = {expression}
+            </span>
+          </CardTitle>
+
+          <button
+            type="button"
+            onClick={() => setShowTable((value) => !value)}
+            aria-expanded={showTable}
+            className={[
+              "group flex shrink-0 items-center gap-2",
+              "rounded-lg border px-3 py-2",
+              "text-sm font-medium",
+              "border-neutral-200 bg-neutral-50",
+              "text-neutral-700",
+              "hover:border-neutral-300 hover:bg-neutral-100",
+              "dark:border-neutral-800 dark:bg-neutral-950",
+              "dark:text-neutral-200",
+              "dark:hover:border-neutral-700",
+              "dark:hover:bg-neutral-900",
+              "focus:outline-none",
+              "focus-visible:ring-2",
+              "focus-visible:ring-neutral-400",
+              "dark:focus-visible:ring-neutral-600",
+              "transition-colors duration-200",
+            ].join(" ")}
+          >
+            <Table2
+              size={16}
+              className="text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"
+            />
+            {showTable ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+        </div>
       </CardHeader>
 
-      <CardContent className="p-4 sm:p-6">
+      <CardContent>
+        <div ref={boardRef} className="h-125 w-full" role="img" />
+
         <div
-          ref={boardRef}
-          className="h-125 w-full overflow-hidden rounded-lg"
-          role="img"
-          aria-label={t.mathematics.functionGraph.ariaLabel}
-        />
-
-        {samplePoints.length > 0 && (
-          <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-neutral-800">
-            <button
-              type="button"
-              onClick={() => setShowTable((value) => !value)}
-              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900"
-              aria-expanded={showTable}
-            >
-              <div>
-                <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                  {t.mathematics.functionGraph.tableDescription}
-                </p>
-
-                <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                  {showTable ? "Ocultar operaciones" : "Mostrar operaciones"}
-                </p>
-              </div>
-
-              <span
-                className={`text-lg text-neutral-500 transition-transform duration-200 dark:text-neutral-400 ${
-                  showTable ? "rotate-180" : ""
-                }`}
-                aria-hidden="true"
-              >
-                <ChevronDown size={24} />
-              </span>
-            </button>
-
-            {showTable && (
-              <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+          className={[
+            "grid transition-[grid-template-rows,opacity]",
+            "duration-300 ease-in-out",
+            showTable
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0",
+          ].join(" ")}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="pt-6">
+              <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
                 <table className="w-full text-sm">
-                  <thead className="bg-neutral-50 dark:bg-neutral-900">
+                  <thead className="border-b border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-950">
                     <tr>
-                      <th className="px-4 py-2 text-left font-medium text-neutral-900 dark:text-neutral-100">
-                        x
-                      </th>
+                      <th className="px-4 py-3 text-left font-medium">x</th>
 
-                      <th className="px-4 py-2 text-left font-medium text-neutral-900 dark:text-neutral-100">
+                      <th className="px-4 py-3 text-left font-medium">f(x)</th>
+
+                      <th className="px-4 py-3 text-left font-medium">
                         {t.mathematics.functionGraph.operation}
-                      </th>
-
-                      <th className="px-4 py-2 text-left font-medium text-neutral-900 dark:text-neutral-100">
-                        f(x)
-                      </th>
-
-                      <th className="px-4 py-2 text-left font-medium text-neutral-900 dark:text-neutral-100">
-                        {t.mathematics.functionGraph.point}
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {samplePoints.map(({ x, y }) => {
-                      const operation = formatOperation(expression, x);
+                  <tbody>
+                    {tableData.points.map((point, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-neutral-100 last:border-0 dark:border-neutral-800"
+                      >
+                        <td className="px-4 py-3 font-mono">
+                          {formatNumber(point.x)}
+                        </td>
 
-                      return (
-                        <tr
-                          key={`${x}-${y}`}
-                          className="text-neutral-700 dark:text-neutral-300"
-                        >
-                          <td className="px-4 py-2 font-medium text-blue-600 dark:text-blue-400">
-                            {formatNumber(x)}
-                          </td>
+                        <td className="px-4 py-3 font-mono">
+                          {formatNumber(point.y)}
+                        </td>
 
-                          <td className="px-4 py-2 font-mono text-sm text-neutral-800 dark:text-neutral-200">
-                            f(
-                            {formatNumber(x)}) = {operation}
-                          </td>
-
-                          <td className="px-4 py-2 font-medium text-red-600 dark:text-red-400">
-                            {formatNumber(y)}
-                          </td>
-
-                          <td className="px-4 py-2 font-medium text-green-600 dark:text-green-400">
-                            ({formatNumber(x)}, {formatNumber(y)})
-                          </td>
-                        </tr>
-                      );
-                    })}
+                        <td className="px-4 py-3 font-mono text-neutral-500 dark:text-neutral-400">
+                          {point.operation}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
-            )}
+            </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

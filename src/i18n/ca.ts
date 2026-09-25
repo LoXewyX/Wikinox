@@ -105,14 +105,7 @@ export const ca = {
       hypotenuse: "hipotenusa",
     },
     functionGraph: {
-      title: "Gràfica de la funció",
-      ariaLabel: "Representació gràfica de la funció",
-      input: "Entrada",
-      output: "Sortida",
       operation: "Operació",
-      point: "Punt",
-      tableDescription:
-        "Triem un valor d'entrada, calculem la sortida i obtenim un punt de la funció.",
     },
     polynomialGraph: {
       title: "Gràfica del polinomi",

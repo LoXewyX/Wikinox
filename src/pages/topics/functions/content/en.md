@@ -20,7 +20,7 @@ $$
 
 This means that the function takes a number $x$, multiplies it by 2, and then adds 1.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ## 1. Elements of a function
@@ -73,7 +73,7 @@ $$
 f(2)=4
 $$
 
-:::function-graph{expression="3x-2" showWorkings=true}
+:::function-graph{expression="3x-2"}
 :::
 
 ## 3. Graphical representation of a function
@@ -187,7 +187,7 @@ $$
 
 All of these points belong to the graph of the function.
 
-:::function-graph{expression="x+1" showWorkings=true}
+:::function-graph{expression="x+1"}
 :::
 
 ### 3.3. From points to the curve
@@ -270,7 +270,7 @@ This means that for every unit we move horizontally, we move 2 units vertically.
 
 That is why all the points maintain the same direction and the graph is a straight line.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ### 3.5. When the slope changes
@@ -333,7 +333,7 @@ $$
 
 is a **parabola**.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ### 3.6. What curvature means
@@ -364,7 +364,7 @@ it reaches its minimum value.
 
 It then begins to increase.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 The shape of the graph is therefore not arbitrary.
@@ -409,7 +409,7 @@ The value of the function increases.
 
 That is why the graph rises from left to right.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 ### 3.8. How to recognize a decreasing function
@@ -438,7 +438,7 @@ As $x$ increases, the value of the function decreases.
 
 That is why the graph falls from left to right.
 
-:::function-graph{expression="-2x+1" showWorkings=true}
+:::function-graph{expression="-2x+1"}
 :::
 
 ### 3.9. A graph can change direction
@@ -457,7 +457,7 @@ After reaching its minimum, it begins to increase.
 
 We can observe this behavior in the graph:
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 This change in behavior allows us to identify important points on a graph, such as **maximums** and **minimums**.
@@ -502,7 +502,7 @@ On the other side, when $x$ approaches 0 through negative values, we obtain nega
 
 That is why the graph has two separate branches.
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 The line:
@@ -571,7 +571,7 @@ The points form two straight lines that meet at the origin.
 
 That is why the graph has a V shape.
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 ### 3.12. The shape of the graph depends on the expression
@@ -611,7 +611,7 @@ $$
 
 For any value of $x$, the result is 3.
 
-:::function-graph{expression="3" showWorkings=true}
+:::function-graph{expression="3"}
 :::
 
 Its graph is a horizontal line.
@@ -636,7 +636,7 @@ $$
 
 If $x$ increases by 1, the value of $f(x)$ increases by 2.
 
-:::function-graph{expression="2x" showWorkings=true}
+:::function-graph{expression="2x"}
 :::
 
 If the slope is positive, the function increases.
@@ -655,7 +655,7 @@ $$
 f(x)=-2x
 $$
 
-:::function-graph{expression="-2x" showWorkings=true}
+:::function-graph{expression="-2x"}
 :::
 
 ## 6. Affine function
@@ -676,7 +676,7 @@ $$
 
 In this function, the slope is $2$ and the constant term is $1$.
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 If $b=0$, we obtain a linear function:
@@ -697,7 +697,7 @@ $$
 f(x)=2x+1
 $$
 
-:::function-graph{expression="2x+1" showWorkings=true}
+:::function-graph{expression="2x+1"}
 :::
 
 A function is **decreasing** when its values decrease as $x$ increases.
@@ -708,7 +708,7 @@ $$
 f(x)=-2x+1
 $$
 
-:::function-graph{expression="-2x+1" showWorkings=true}
+:::function-graph{expression="-2x+1"}
 :::
 
 For affine functions, the sign of the slope determines whether the function is increasing or decreasing.
@@ -745,7 +745,7 @@ $$
 f(x)=x^2
 $$
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 Its graph has the shape of a parabola.
@@ -766,7 +766,7 @@ $$
 f(x)=-x^2
 $$
 
-:::function-graph{expression="-x^2" showWorkings=true}
+:::function-graph{expression="-x^2"}
 :::
 
 ## 9. Absolute value function
@@ -797,7 +797,7 @@ $$
 f(x)=|x|
 $$
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 Its graph has a V shape.
@@ -820,7 +820,7 @@ $$
 
 The graph of this function has two branches.
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 The value $x=0$ does not belong to the domain of this function.
@@ -911,7 +911,7 @@ Therefore, $x=2$ is a zero of the function.
 
 Graphically, it corresponds to the point where the graph crosses the $x$-axis.
 
-:::function-graph{expression="x-2" showWorkings=true}
+:::function-graph{expression="x-2"}
 :::
 
 ## 14. Intersection with the $y$-axis
@@ -940,7 +940,7 @@ $$
 (0,3)
 $$
 
-:::function-graph{expression="2x+3" showWorkings=true}
+:::function-graph{expression="2x+3"}
 :::
 
 ## 15. Transformations of functions
@@ -961,7 +961,7 @@ $$
 
 the graph moves 2 units upward.
 
-:::function-graph{expression="x^2+2" showWorkings=true}
+:::function-graph{expression="x^2+2"}
 :::
 
 If we subtract 2:
@@ -972,7 +972,7 @@ $$
 
 the graph moves 2 units downward.
 
-:::function-graph{expression="x^2-2" showWorkings=true}
+:::function-graph{expression="x^2-2"}
 :::
 
 If we replace $x$ with $x-2$:
@@ -983,7 +983,7 @@ $$
 
 the graph moves 2 units to the right.
 
-:::function-graph{expression="(x-2)^2" showWorkings=true}
+:::function-graph{expression="(x-2)^2"}
 :::
 
 ## 16. Functions and value tables
@@ -1096,7 +1096,7 @@ $$
 (f\circ g)(x)=2x+2
 $$
 
-:::function-graph{expression="2x+2" showWorkings=true}
+:::function-graph{expression="2x+2"}
 :::
 
 ## 19. Inverse function
@@ -1139,10 +1139,10 @@ $$
 f^{-1}(x)=x-2
 $$
 
-:::function-graph{expression="x+2" showWorkings=true}
+:::function-graph{expression="x+2"}
 :::
 
-:::function-graph{expression="x-2" showWorkings=true}
+:::function-graph{expression="x-2"}
 :::
 
 The function and its inverse have graphs that are reflections of each other across the line:
@@ -1171,10 +1171,10 @@ The symbol $\geq$ means **“greater than or equal to”**.
 
 Therefore, for negative values of $x$, we use $x+1$, while for values greater than or equal to 0, we use $x^2$.
 
-:::function-graph{expression="x+1" restriction="x<0" showWorkings=true}
+:::function-graph{expression="x+1" restriction="x<0"}
 :::
 
-:::function-graph{expression="x^2" restriction="x>=0" showWorkings=true}
+:::function-graph{expression="x^2" restriction="x>=0"}
 :::
 
 Piecewise-defined functions are especially useful for representing situations in which the same relationship changes depending on the interval being considered.

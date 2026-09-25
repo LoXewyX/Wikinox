@@ -18,7 +18,7 @@ $$
 
 Esta expresión indica que la función toma un valor $x$, lo multiplica por 2 y después suma 1.
 
-:::function-graph{expression="2*x" showWorkings=true}
+:::function-graph{expression="2*x"}
 :::
 
 ## 1. Funciones
@@ -193,7 +193,7 @@ $$
 (2,5)
 $$
 
-:::function-graph{expression="2*x+1" showWorkings=true}
+:::function-graph{expression="2*x+1"}
 :::
 
 ### 4.3. De los puntos a la curva
@@ -222,7 +222,7 @@ $$
 
 produce una curva llamada **parábola**.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ### 4.4. Por qué aparece una recta
@@ -293,7 +293,7 @@ la pendiente cambia según el lugar de la gráfica.
 
 Por eso la representación gráfica no es una recta, sino una curva.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ### 4.6. Qué significa la curvatura
@@ -352,7 +352,7 @@ significa que 5 es mayor que 2.
 
 En una gráfica, una función creciente sube cuando avanzamos de izquierda a derecha.
 
-:::function-graph{expression="2*x+1" showWorkings=true}
+:::function-graph{expression="2*x+1"}
 :::
 
 ### 4.8. Cómo reconocer una función decreciente
@@ -383,7 +383,7 @@ significa que 2 es menor que 5.
 
 En una gráfica, una función decreciente baja cuando avanzamos de izquierda a derecha.
 
-:::function-graph{expression="-2*x+1" showWorkings=true}
+:::function-graph{expression="-2*x+1"}
 :::
 
 ### 4.9. Una gráfica puede cambiar de dirección
@@ -400,7 +400,7 @@ decrece cuando $x$ se acerca a cero desde valores negativos y crece cuando $x$ s
 
 La gráfica cambia de dirección en su punto mínimo.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ### 4.10. Funciones con dos ramas
@@ -439,7 +439,7 @@ $$
 D_f=\mathbb{R}\setminus\{0\}
 $$
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 ### 4.11. La gráfica del valor absoluto
@@ -472,7 +472,7 @@ $$
 
 Su gráfica tiene forma de V.
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 ### 4.12. La forma de la gráfica depende de la expresión
@@ -503,7 +503,7 @@ $$
 
 produce una gráfica con dos ramas.
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 ## 5. Función constante
@@ -534,7 +534,7 @@ $$
 
 Su gráfica es una recta horizontal.
 
-:::function-graph{expression="4" showWorkings=true}
+:::function-graph{expression="4"}
 :::
 
 ## 6. Función lineal
@@ -561,7 +561,7 @@ $$
 
 Su gráfica es una recta que pasa por el origen.
 
-:::function-graph{expression="2*x" showWorkings=true}
+:::function-graph{expression="2*x"}
 :::
 
 Cuando $m>0$, la función es creciente.
@@ -610,7 +610,7 @@ $$
 (0,3)
 $$
 
-:::function-graph{expression="2*x+3" showWorkings=true}
+:::function-graph{expression="2*x+3"}
 :::
 
 ## 8. Crecimiento y decrecimiento
@@ -667,7 +667,7 @@ $$
 f(x)=x^2
 $$
 
-:::function-graph{expression="x^2" showWorkings=true}
+:::function-graph{expression="x^2"}
 :::
 
 Si $a>0$, la parábola se abre hacia arriba.
@@ -680,7 +680,7 @@ $$
 f(x)=-x^2
 $$
 
-:::function-graph{expression="-x^2" showWorkings=true}
+:::function-graph{expression="-x^2"}
 :::
 
 ## 10. Función de valor absoluto
@@ -715,7 +715,7 @@ $$
 
 tiene forma de V y su vértice está en el origen.
 
-:::function-graph{expression="abs(x)" showWorkings=true}
+:::function-graph{expression="abs(x)"}
 :::
 
 ## 11. Función racional
@@ -744,7 +744,7 @@ $$
 
 La gráfica tiene dos ramas.
 
-:::function-graph{expression="1/x" showWorkings=true}
+:::function-graph{expression="1/x"}
 :::
 
 Otro ejemplo es:
@@ -875,7 +875,7 @@ El cero de la función es $3$.
 
 Gráficamente, los ceros de una función corresponden a los puntos donde su gráfica corta el eje $x$.
 
-:::function-graph{expression="x-3" showWorkings=true}
+:::function-graph{expression="x-3"}
 :::
 
 ## 15. Intersección con el eje y
@@ -904,7 +904,7 @@ $$
 (0,3)
 $$
 
-:::function-graph{expression="2*x+3" showWorkings=true}
+:::function-graph{expression="2*x+3"}
 :::
 
 ## 16. Transformaciones de funciones
@@ -941,7 +941,7 @@ $$
 
 La segunda gráfica está desplazada dos unidades hacia arriba.
 
-:::function-graph{expression="x^2+2" showWorkings=true}
+:::function-graph{expression="x^2+2"}
 :::
 
 ### Desplazamiento horizontal
@@ -964,7 +964,7 @@ $$
 
 representa la parábola $x^2$ desplazada dos unidades hacia la derecha.
 
-:::function-graph{expression="(x-2)^2" showWorkings=true}
+:::function-graph{expression="(x-2)^2"}
 :::
 
 ### Reflexión respecto del eje x
@@ -989,7 +989,7 @@ $$
 g(x)=-x^2
 $$
 
-:::function-graph{expression="-x^2" showWorkings=true}
+:::function-graph{expression="-x^2"}
 :::
 
 ## 17. Funciones y tablas de valores
@@ -1195,5 +1195,5 @@ $$
 
 Una función definida a trozos puede tener diferentes comportamientos en diferentes partes de su dominio.
 
-:::function-graph{expression="x+1" restriction="x<0" showWorkings=true}
+:::function-graph{expression="x+1" restriction="x<0"}
 :::
