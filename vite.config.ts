@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/wikinox",
   plugins: [preact(), tailwindcss()],
   resolve: {
     alias: {
@@ -12,5 +13,4 @@ export default defineConfig({
       math: path.resolve(import.meta.dirname, "./src/components/mathematics"),
     },
   },
-  base: "/wikinox",
 });
