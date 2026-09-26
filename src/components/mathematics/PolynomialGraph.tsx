@@ -527,6 +527,8 @@ export default function PolynomialGraph({
   const { t } = useI18n();
   const { resolvedTheme } = useTheme();
 
+  const text = t.mathematics.polynomialGraph;
+
   const boardRef = useRef<HTMLDivElement>(null);
 
   const safeMin = useMemo(() => {
@@ -776,13 +778,13 @@ export default function PolynomialGraph({
           ref={boardRef}
           className="h-125 w-full overflow-hidden"
           role="img"
-          aria-label={t.mathematics.polynomialGraph.ariaLabel}
+          aria-label={text.ariaLabel}
         />
 
         <div className="mt-5 grid gap-3 border-t border-neutral-200 pt-5 dark:border-neutral-800 sm:grid-cols-3">
           <div className="rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-950">
             <div className="text-xs text-neutral-500 dark:text-neutral-400">
-              {t.mathematics.polynomialGraph.degree}
+              {text.degree}
             </div>
 
             <div className="mt-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
@@ -792,19 +794,19 @@ export default function PolynomialGraph({
 
           <div className="rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-950">
             <div className="text-xs text-neutral-500 dark:text-neutral-400">
-              {t.mathematics.polynomialGraph.realRoots}
+              {text.realRoots}
             </div>
 
             <div className="mt-1 wrap-break-words text-lg font-semibold text-neutral-900 dark:text-neutral-100">
               {info.roots.length > 0
                 ? info.roots.map(formatNumber).join(", ")
-                : t.mathematics.polynomialGraph.none}
+                : text.none}
             </div>
           </div>
 
           <div className="rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-950">
             <div className="text-xs text-neutral-500 dark:text-neutral-400">
-              {t.mathematics.polynomialGraph.yIntercept}
+              {text.yIntercept}
             </div>
 
             <div className="mt-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">

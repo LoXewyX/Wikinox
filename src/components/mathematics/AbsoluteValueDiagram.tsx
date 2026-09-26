@@ -3,11 +3,12 @@ import { useI18n } from "@/providers/I18nProvider";
 
 export default function AbsoluteValueDiagram() {
   const { t } = useI18n();
+  const text = t.mathematics.absoluteValue;
 
   return (
     <Card className="my-8 overflow-hidden">
       <CardHeader>
-        <CardTitle>{t.mathematics.absoluteValue.title}</CardTitle>
+        <CardTitle>{text.title}</CardTitle>
       </CardHeader>
 
       <CardContent className="p-5">
@@ -15,7 +16,7 @@ export default function AbsoluteValueDiagram() {
           viewBox="0 0 600 140"
           className="block w-full"
           role="img"
-          aria-label={t.mathematics.absoluteValue.ariaLabel}
+          aria-label={text.ariaLabel}
         >
           <line
             x1="60"
@@ -141,7 +142,7 @@ export default function AbsoluteValueDiagram() {
             fontSize="12"
             className="dark:fill-neutral-400"
           >
-            5 {t.mathematics.absoluteValue.units}
+            5 {text.units}
           </text>
           <text
             x="360"
@@ -151,11 +152,11 @@ export default function AbsoluteValueDiagram() {
             fontSize="12"
             className="dark:fill-neutral-400"
           >
-            5 {t.mathematics.absoluteValue.units}
+            5 {text.units}
           </text>
         </svg>
         <p className="mt-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
-          {t.mathematics.absoluteValue.description}
+          {text.description}
         </p>
       </CardContent>
     </Card>

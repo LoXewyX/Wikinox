@@ -16,6 +16,7 @@ export default function RightTriangleDiagram({
   showHypotenuse = true,
 }: RightTriangleDiagramProps) {
   const { t } = useI18n();
+  const text = t.mathematics.rightTriangle;
   const a = Number(adjacent);
   const o = Number(opposite);
   const h = hypotenuse !== undefined ? Number(hypotenuse) : Math.hypot(a, o);
@@ -85,7 +86,7 @@ export default function RightTriangleDiagram({
   return (
     <section className="my-8 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-        <h3 className="font-semibold">{t.mathematics.rightTriangle.title}</h3>
+        <h3 className="font-semibold">{text.title}</h3>
         {mode === "trigonometry" && (
           <span className="rounded-md bg-neutral-200 px-2.5 py-1 text-sm font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
             θ {equalitySymbol(theta)} {formatValue(theta, 2)}°
@@ -97,7 +98,7 @@ export default function RightTriangleDiagram({
           viewBox="0 0 340 250"
           className="mx-auto block w-full max-w-md overflow-visible"
           role="img"
-          aria-label={t.mathematics.rightTriangle.ariaLabel}
+          aria-label={text.ariaLabel}
         >
           <polygon
             points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
@@ -144,7 +145,7 @@ export default function RightTriangleDiagram({
             fontSize="13"
             className="fill-neutral-700 dark:fill-neutral-300"
           >
-            {t.mathematics.rightTriangle.adjacent} = {a}
+            {text.adjacent} = {a}
           </text>
           <text
             x={oppositeLabelX}
@@ -154,7 +155,7 @@ export default function RightTriangleDiagram({
             fontSize="13"
             className="fill-neutral-700 dark:fill-neutral-300"
           >
-            {t.mathematics.rightTriangle.opposite} = {o}
+            {text.opposite} = {o}
           </text>
           {showHypotenuse && (
             <g
@@ -174,8 +175,7 @@ export default function RightTriangleDiagram({
                 fontSize="13"
                 className="fill-neutral-800 dark:fill-neutral-200"
               >
-                {t.mathematics.rightTriangle.hypotenuse} {equalitySymbol(h)}{" "}
-                {formatValue(h, 2)}
+                {text.hypotenuse} {equalitySymbol(h)} {formatValue(h, 2)}
               </text>
             </g>
           )}

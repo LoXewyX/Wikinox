@@ -33,7 +33,7 @@ function LessonNavigation({ previousTopic, nextTopic }: LessonNavigationProps) {
     >
       {previousTopic ? (
         <a
-          href={`/Wikinox/topics/${previousTopic.id}`}
+          href={`/topics/${previousTopic.id}`}
           className={[
             "group flex min-w-0 items-center gap-3 rounded-lg border",
             "border-neutral-200 px-4 py-3",
@@ -69,7 +69,7 @@ function LessonNavigation({ previousTopic, nextTopic }: LessonNavigationProps) {
 
       {nextTopic ? (
         <a
-          href={`/Wikinox/topics/${nextTopic.id}`}
+          href={`/topics/${nextTopic.id}`}
           className={[
             "group flex min-w-0 items-center justify-end gap-3 rounded-lg border",
             "border-neutral-200 px-4 py-3 text-right",
